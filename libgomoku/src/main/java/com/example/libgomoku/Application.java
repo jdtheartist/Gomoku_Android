@@ -22,17 +22,14 @@ public class Application {
 
     private static void mainloop(Board board,Interface ui, Scanner scanner){
         int player = 1;
-        int winner = 0; // 0 means the game has not been won yet; 1 means player won has won, -1 means player two has won.
+        int winner = 0; // 0 means the game has not been won yet; 1 means player won has won....
+        int numPlayers = 3;
 
         String input;
 
         while (winner == 0){
 
-            if (player == 1)
-                System.out.println("It's Player 1's turn");
-            else
-                System.out.println("It's Player 2's turn");
-
+            System.out.println("It's Player "+ Integer.toString(player) +"'s turn");
 
             do {
                 System.out.print("Enter position x y: ");
@@ -40,7 +37,7 @@ public class Application {
             } while ( !doMove(player,input,board)); // Do move - returns False if move is invalid
 
 
-            player *= -1; //Toggle player
+            player = player % numPlayers + 1; //Toggle player
 
             ui.printboard(board); //Print the board
 
@@ -51,10 +48,12 @@ public class Application {
 
         }
 
+        System.out.println("Player "+ Integer.toString(winner) +" has won");
+
     }
 
     private static int checkWin() {
-        //Check for a winner >>> return 1 for player 1, return -1 for player 2, and 0 for no winner
+        //Check for a winner >>> return 1 for player 1, and 0 for no winner
 
         return 0;
     }

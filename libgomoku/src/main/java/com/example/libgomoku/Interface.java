@@ -25,8 +25,9 @@ public class Interface {
             for (j = 0; j < board.boardSize; j++){
                 switch (board.getSquareState(j, i)){
                     case ( 1): System.out.print(p1char+' '); break;
-                    case (-1): System.out.print(p2char+' '); break;
-                    case ( 0): System.out.print("* ");
+                    case ( 2): System.out.print(p2char+' '); break;
+                    case ( 0): System.out.print("* "); break;
+                    default : System.out.print("!!"); break;
                 }
             }
             System.out.println("|");

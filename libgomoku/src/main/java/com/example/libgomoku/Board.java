@@ -6,7 +6,7 @@ package com.example.libgomoku;
  */
 
 public class Board {
-    int boardSize = 15;
+    int boardSize = 5;
     Square squares[] = new Square[boardSize * boardSize];
 
     public Board() {
@@ -53,7 +53,6 @@ class Square {
     public int getX(){
         return x;
     }
-
 
     public int getY(){
         return y;
