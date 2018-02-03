@@ -23,7 +23,7 @@ public class Application {
     private static void mainloop(Board board,Interface ui, Scanner scanner){
         int player = 1;
         int winner = 0; // 0 means the game has not been won yet; 1 means player won has won....
-        int numPlayers = 3;
+        int numPlayers = 2;
 
         String input;
 
@@ -37,11 +37,16 @@ public class Application {
             } while ( !doMove(player,input,board)); // Do move - returns False if move is invalid
 
 
+            //Get coords (this is repeated code so I need to fix this later)
+            String[] temp = input.split(" ");
+            int x = Integer.parseInt(temp[0]) - 1; //Convert string to int
+            int y = Integer.parseInt(temp[1]) - 1; //Convert string to int
+
+            winner = board.checkWin(x,y); //Check if game is won ( returns who won )
+
             player = player % numPlayers + 1; //Toggle player
 
             ui.printboard(board); //Print the board
-
-            winner = checkWin(); //Check if game is won ( returns who won )
 
             System.out.println(""); //Print a new line
 
@@ -52,11 +57,7 @@ public class Application {
 
     }
 
-    private static int checkWin() {
-        //Check for a winner >>> return 1 for player 1, and 0 for no winner
 
-        return 0;
-    }
 
     private static boolean doMove(int player,String move,Board board){
         //Need to add validity checks
