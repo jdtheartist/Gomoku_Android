@@ -54,22 +54,22 @@ public class Board {
 
         for (int count = 0; count < 8; count++){
 
+            System.out.println("Count: " + Integer.toString(count));
+
             int checkX = lastX + DIRECTIONS[count][0];
             int checkY = lastY + DIRECTIONS[count][1];
 
             if (getSquareState(checkX, checkY) == checkState){
-                int checkDirection =count;
                 int rowLength = 1;
 
                 while (getSquareState(checkX,checkY) == checkState && rowLength < 5){
                     rowLength ++;
                     checkX = checkX + DIRECTIONS[count][0];
                     checkY = checkY + DIRECTIONS[count][1];
-                    System.out.println("Count: " + Integer.toString(count));
-                    System.out.println("Last X: " + Integer.toString(lastX));
-                    System.out.println("Last y: " + Integer.toString(lastY));
-                    System.out.println("new X: " + Integer.toString(lastX));
-                    System.out.println("new Y: " + Integer.toString(lastY));
+
+                    System.out.println("Last X: " + Integer.toString(checkX));
+                    System.out.println("Last Y: " + Integer.toString(checkY));
+
 
                 }
 
