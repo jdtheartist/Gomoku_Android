@@ -6,32 +6,83 @@ package com.example.libgomoku;
  */
 
 public class Board {
-    int boardSize = 5;
+    int boardSize = 15;
     Square squares[] = new Square[boardSize * boardSize];
+    int[][] DIRECTIONS = new int[][]{
+            { 0, 1},
+            { 1, 1},
+            { 1, 0},
+            { 1, -1},
+            { 0, -1},
+            { -1, -1},
+            { -1, 0},
+            { -1, 1}
+    };
+
     public Board() {
-
-
-
 
         int x, y, count;
         count = 0;
+
         for (x = 0; x < boardSize; x++) {
             for (y = 0; y < boardSize; y++) {
                 squares[count] = new Square(x, y);
                 count++;
             }
         }
-        /*int i;
-        for (i = 0; i < boardSize * boardSize; i++) {
-            System.out.println(Integer.toString(squares[i].getX()));
-        }*/
+
+    }
+    public int getSquareState(int x, int y){
+        for(Square square: squares) {
+            if (square.getX() == x && square.getY() == y)
+                return square.getState();
+        }
+        return -1;
+    }
+
+    public boolean setSquare (int x, int y, int player){
+        int position = boardSize * y + x; //Get position of a square in list from its x and y coordinates
+        squares[position].setState(player); //Set the state of that square to be occupied by player
+
+        //Check if valid
+        return true;
     }
 
 
+    public int checkWin(int lastX,int lastY) {
+        int checkState = getSquareState(lastX,lastY);
+
+        for (int count = 0; count < 8; count++){
+
+            System.out.println("Count: " + Integer.toString(count));
+
+            int checkX = lastX + DIRECTIONS[count][0];
+            int checkY = lastY + DIRECTIONS[count][1];
+
+            if (getSquareState(checkX, checkY) == checkState){
+                int rowLength = 1;
+
+                while (getSquareState(checkX,checkY) == checkState && rowLength < 5){
+                    rowLength ++;
+                    checkX = checkX + DIRECTIONS[count][0];
+                    checkY = checkY + DIRECTIONS[count][1];
+
+                    System.out.println("Last X: " + Integer.toString(checkX));
+                    System.out.println("Last Y: " + Integer.toString(checkY));
+
+
+                }
+
+                if (rowLength == 5)
+                    return checkState;
+            }
+        }
+        return 0;
+    }
 }
 
 class Square {
-    int x, y, state;
+    private int x, y, state;
 
     public Square(int xx,int yy) {
         x = xx;
@@ -42,7 +93,6 @@ class Square {
     public int getX(){
         return x;
     }
-
 
     public int getY(){
         return y;
