@@ -1,3 +1,3 @@
-# Gomoku-Android
+In the libgomoku folder there is the java implementation- just java and no android.
+This should be used for initial development
 
-libgomoku folder contains the main program
