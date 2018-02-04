@@ -2,6 +2,7 @@ package jdtheartist.gomoku;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -51,11 +52,6 @@ public class MainActivity extends Activity {
 
     class GameView extends SurfaceView implements Runnable {
 
-
-
-
-
-
         // This is our thread
         Thread gameThread = null;
 
@@ -83,9 +79,11 @@ public class MainActivity extends Activity {
         // Gomoku board object
         Board board;
 
+        //To keep track of whose turn it is
+        int player, numPlayers, winner;
+
         //Screen width and height
-        int height;
-        int width;
+        int height, minx, miny, padding;
 
 
         public GameView(Context context) {
@@ -100,16 +98,25 @@ public class MainActivity extends Activity {
             ourHolder = getHolder();
             paint = new Paint();
 
-            board = new Board();
 
-            //Get screen width and height
-            DisplayMetrics displayMetrics = new DisplayMetrics();
-            getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-            int height = displayMetrics.heightPixels;
-            int width = displayMetrics.widthPixels;
+            int width = Resources.getSystem().getDisplayMetrics().widthPixels;
+            int height = Resources.getSystem().getDisplayMetrics().heightPixels;
+            padding = 40;
+            board = new Board(padding, (height / 2 - width / 2) + padding, width - padding, (height / 2 + width / 2) - padding);
+            player = 1;
+            numPlayers = 2;
+            winner = 0;
 
         }
-
+        public void restart(){
+            int width = Resources.getSystem().getDisplayMetrics().widthPixels;
+            int height = Resources.getSystem().getDisplayMetrics().heightPixels;
+            padding = 40;
+            board = new Board(padding, (height / 2 - width / 2) + padding, width - padding, (height / 2 + width / 2) - padding);
+            player = 1;
+            numPlayers = 2;
+            winner = 0;
+        }
         public void run() {
             while (playing) {
 
@@ -150,45 +157,43 @@ public class MainActivity extends Activity {
                 if (pressed)
                     canvas.drawColor(Color.argb(255,  26, 128, 182));
                 else
-                    canvas.drawColor(Color.argb(255,  255, 255, 255));
+                    canvas.drawColor(Color.rgb( 182, 155, 76));
 
-                //Draw the gomoku board - using vectors for now
-                paint.setColor(Color.rgb(0,0,0));
-                paint.setStyle(Paint.Style.STROKE);
-                paint.setStrokeWidth(10);
+                //draw the board
 
-                canvas.drawRect(0,getHeight()/2+getWidth()/2,getWidth(),getHeight()/2-getWidth()/2,paint);
+                paint.setStrokeWidth(2);
+                paint.setStyle(Paint.Style.FILL_AND_STROKE);
+                //canvas.drawRect(board.left, board.top, board.right, board.bottom ,paint);
 
-                //Draw the gomoko squares
-                int miny = getHeight()/2+getWidth()/2;
-                int maxy = getHeight()/2-getWidth()/2;
-
-                int height = maxy - miny;
-
-                for (int y = 0; y < board.boardSize; y++){
-                    for (int x = 0; x < board.boardSize; x ++){
-                        int topRectangle = 0;
-
-                        canvas.drawRect((getWidth()/board.boardSize)*x,getHeight()/2 + 10,(getWidth()/board.boardSize)*(x+1),getHeight()/2-10,paint);
-                    }
+                paint.setColor(Color.BLACK);
+                for (int i = 0; i < board.boardSize; i++){
+                    //Sorry for this spaghetti
+                    canvas.drawLine(board.left,board.top - i * ((board.top - board.bottom)/(board.boardSize - 1)),board.right, board.top - i * ((board.top - board.bottom)/(board.boardSize - 1)), paint);
+                    canvas.drawLine(board.right - i * ((board.right - board.left)/(board.boardSize - 1)),board.top,board.right - i * ((board.right - board.left)/(board.boardSize - 1)), board.bottom, paint);
                 }
 
 
 
 
+                //Draw the gomoko pieces
 
+                for (Square square: board.squares){
+                    switch(square.getState()){
+                        case (1):
+                            paint.setColor(Color.rgb(130, 82, 1));//brown
+                            break;
+                        case (2):
+                            paint.setColor(Color.rgb(237,237,237));//white
+                            break;
+                        default:
+                            continue;//leave loop
+                    }
 
+                    int x = (int)( (float)board.left + (((float)square.getX())/((float)board.boardSize-1)) * ((float)board.right - (float)board.left));
+                    int y = (int)( (float)board.top + (((float)square.getY())/((float)board.boardSize-1)) * ((float)board.bottom - (float)board.top));
+                    canvas.drawCircle(x,y,25,paint);
 
-
-
-
-
-
-
-
-
-
-                // Choose the brush color for drawing
+                }
 
                 paint.setColor(Color.argb(255,  249, 129, 0));
 
@@ -197,6 +202,11 @@ public class MainActivity extends Activity {
                 paint.setStrokeWidth(2);
                 // Display the current fps on the screen
                 canvas.drawText("FPS:" + fps, 20, 40, paint);
+
+                //Draw which player it is
+                paint.setColor(Color.BLACK);
+                paint.setTextSize(100);
+                canvas.drawText("Player:" + player, board.right/2, board.top/2, paint);
 
                 // Draw everything to the screen
                 // and unlock the drawing surface
@@ -224,6 +234,29 @@ public class MainActivity extends Activity {
             gameThread.start();
         }
 
+        public void doMove(float x,float y){
+
+            y -= (board.top-padding);
+            float height = (board.bottom+padding) - (board.top-padding);
+            float width = Resources.getSystem().getDisplayMetrics().widthPixels ;
+
+            int newx = (int)((x/width)*board.boardSize);
+            int newy = (int)((y/height)*board.boardSize);
+
+            Log.d("newx", Integer.toString(newx));
+            Log.d("newy", Integer.toString(newy));
+
+            board.setSquare(newx,newy,player);
+
+            player = player % numPlayers + 1; //Toggle player
+
+            winner = board.checkWin(newx,newy);
+
+            if (winner > 0){
+                restart();
+            }
+        }
+
         @Override
         public boolean onTouchEvent(MotionEvent motionEvent) {
 
@@ -232,9 +265,15 @@ public class MainActivity extends Activity {
                 // Player has touched the screen
                 case MotionEvent.ACTION_DOWN:
 
-                    // Set isMoving so Bob is moved in the update method
                     pressed = true;
-
+                    //board.setSquare(3,3,1);
+                    Log.d("Rx", Float.toString(motionEvent.getRawX()));
+                    Log.d("Ry", Float.toString(motionEvent.getRawY()));
+                    Log.d("x", Float.toString(motionEvent.getX()));
+                    Log.d("y", Float.toString(motionEvent.getY()));
+                    //if (motionEvent.getRawX() > board.left && motionEvent.getRawX() < board.right && motionEvent.getRawY() > board.top && motionEvent.getRawY() < board.bottom)
+                        doMove(motionEvent.getX(),motionEvent.getY());
+                    //doMove(motionEvent.getX(),motionEvent.getY());
                     break;
 
                 // Player has removed finger from screen
@@ -242,18 +281,10 @@ public class MainActivity extends Activity {
 
                     // Set isMoving so Bob does not move
                     pressed = false;
-
+                   // board.setSquare(3,8,2);
                     break;
             }
             return true;
         }
     }
-
-
-
-
-
-
-
-
 }
